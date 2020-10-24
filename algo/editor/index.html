@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>P3@KGU</title>
+    <meta charset="utf-8"/>
+    <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css" />
+    <link rel="stylesheet" href="./lib/codemirror.css" />
+    <link rel="stylesheet" href="./theme/base16-dark.css" />
+    <link rel="stylesheet" href="./algo.css" />
+    <script type="text/javascript" src="https://code.jquery.com/jquery-latest.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.10.0/jquery-ui.js"></script>
+    <script src="./lib/codemirror.js"></script>
+    <script src="./lib/clike.js"></script>
+    <script src="./lib/python.js"></script>
+    <script src="./addon/edit/matchbrackets.js"></script>
+    <script type="text/javascript">
+
+        //칸 움직이는거 ㅇㅇ
+        $(function() {
+            $("article.problem").resizable({
+                minWidth: 100,
+                maxWidth: 800,
+                handles: "e"
+            });
+            $("article.code").resizable({
+                minHeight: 25,
+                maxHeight: 825,
+                handles: "s",
+                resize: function(e, ui) {
+                    var currentHeight = ui.size.height;
+                    currentHeight += 5;
+                    $("article.result").css("height", "calc(100% - " + currentHeight + "px)");
+                }
+            });
+        });
+		//가운데 높이 조절
+		$(document).ready(function() {
+			var headerHeight = $("header").height();
+			var footerHeight = $("footer").height();
+			var Height = headerHeight + footerHeight;
+            $("#main").css("height", "calc(100% - " + Height + "px)");
+		})
+        //언어설정
+        $(document).ready(function() {
+            $("#lang .C").click(function() {
+                editor.setOption("mode", "text/x-csrc");
+                $("#lang .selectedlang").text("C");
+                
+            });
+            $("#lang .Cpp").click(function() {
+                editor.setOption("mode", "text/x-c++src");
+                $("#lang .selectedlang").text("C++");
+                
+            });
+            $("#lang .Java").click(function() {
+                editor.setOption("mode", "text/x-java");
+                $("#lang .selectedlang").text("Java");
+                
+            });
+            $("#lang .Python2").click(function() {
+                var mode = {
+                    name: "python",
+                    version: 2,
+                    singleLinesStringErrors: false
+                };
+                editor.setOption("mode", mode);
+                $("#lang .selectedlang").text("Python2");
+                
+            });
+            $("#lang .Python3").click(function() {
+                var mode = {
+                    name: "python",
+                    version: 3,
+                    singleLinesStringErrors: false
+                };
+                editor.setOption("mode", mode);
+                $("#lang .selectedlang").text("Python3");
+                
+            });
+        });
+        
+		//코드 보내는 부분
+		$(document).ready(function(){
+			$("#sender").click(function() {
+				var url="../submitCode.jsp";
+				var params = new Object();
+				params.code = editor.getValue();
+				params.lang = $("#lang .selectedlang").text();
+				params.probNumber = "0";
+				params.mode = "submit";
+
+				var jsonData = JSON.stringify(params);
+				$.ajax({
+					type: "POST",
+					url: url,
+					dataType: "json",
+					data: {
+						jsonParam: jsonData
+					},      
+					beforeSend: function() {
+						$("#loader").css("display","table-cell");
+					},
+					success: function(args) {
+						$(".result").html(args.result);
+					},
+					error: function(e) {
+						alert(e.responseText);
+					},
+					complete: function(){
+						$("#loader").hide();
+					}
+				});
+			}); 
+			$("#checker").click(function() {
+				var url="../submitCode.jsp";
+				var params = new Object();
+				params.code = editor.getValue();
+				params.lang = $("#lang .selectedlang").text();
+				params.probNumber = "0";
+				params.mode = "prac";
+
+				var jsonData = JSON.stringify(params);
+				$.ajax({
+					type: "POST",
+					url: url,
+					dataType: "json",
+					data: {
+						jsonParam: jsonData
+					},      
+					beforeSend: function() {
+						$("#loader").css("display","table-cell");
+					},
+					success: function(args) {
+						$(".result").html(args.result);
+					},
+					error: function(e) {
+						alert(e.responseText);
+					},
+					complete: function(){
+						$("#loader").hide();
+					}
+				});
+			}); 
+		});
+		});
+	</script>
+</head>
+
+<body>
+<div id="loader"><div class="loader-text"><p>LOADING...</p></div></div>
+    <header class="algo-header">
+        <aside id="menu">dd</aside>
+        <article class="probnum">
+        <h1>
+                prob1. 가위바위보
+        </h1>
+        </article>
+        <article class="userinfo"></article>
+        <aside id="lang">
+            <span class="selectedlang">C</span>
+            <div class="languages">
+                <p class="C">C</p>
+                <p class="Cpp">C++</p>
+                <p class="Java">Java</p>
+                <p class="Python2">Python2</p>
+                <p class="Python3">Python3</p>
+            </div>
+        </aside>
+    </header>
+    <section class="algo-section">
+        <article class="problem">
+            <p>문제1 안녕</p>
+        </article>
+        <div class="horizontal"></div>
+
+        <article class="code">
+            <textarea id="editor"></textarea>
+        </article>
+
+        <div class="vertical"></div>
+        <article class="result">
+            result
+        </article>
+
+    </section>
+    <footer class="algo-footer">
+            <div id="sender">제출</div>
+            <div id="checker">실행</div>
+      
+        <script>
+            var textarea = document.getElementById('editor');
+            var editor = CodeMirror.fromTextArea(textarea, {
+                mode: "text/x-csrc",
+                lineNumbers: true,
+                lineWrapping: true,
+				indentWithTabs:true,
+				indentUnit:4,
+                theme: "base16-dark",
+                styleActiveLine: true,
+                matchBrackets: true,
+            });
+        </script>
+    </footer>
+</body>
+
+</html>

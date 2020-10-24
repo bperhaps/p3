@@ -1,0 +1,64 @@
+<%@ page language="java" contentType="text/html; charset=utf-8" pageEncoding="utf-8"%>
+
+<%@ page import="org.json.simple.JSONObject"%>
+<%@ page import="org.json.simple.JSONArray"%>
+<%@ page import="org.json.simple.parser.JSONParser"%>
+<%@ page import="java.util.*"%>
+<%@ page import="algo.FileControll"%>
+<%@ page import="java.security.MessageDigest"%>
+<%@ page import="java.text.*"%>
+<%@page import="algo.DBUtil"%>
+<%@page import="java.sql.ResultSet"%>
+<%@page import="java.sql.PreparedStatement"%>
+<%@page import="java.sql.Connection"%>
+
+<%
+if((String)session.getAttribute("isProfessor") == "true" || (String)session.getAttribute("isAdmin") == "true"){
+} else return;
+	String userName = (String)session.getAttribute("name");
+	String studentId = (String)session.getAttribute("studentId");
+	if (userName == null || studentId == null) return ;
+	
+	JSONObject resultObj = new JSONObject();
+	
+	//＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊//
+	// 파라미터 추출 및 확인
+	String jsonParam = request.getParameter("jsonParam");
+	if (jsonParam == null) {
+		resultObj.put("result", "error - 잘못된 파라미터입니다.");
+		out.print(resultObj);
+		out.close();
+		return ;
+	}
+
+	JSONParser jsonParser = new JSONParser();	
+	JSONObject paramObj = (JSONObject)jsonParser.parse(jsonParam); 
+
+	String context = (String)paramObj.get("context");
+	String subject = (String)paramObj.get("subject");
+	if (context == "" || subject == "") {
+		resultObj.put("result", "error - 잘못된 파라미터입니다.");
+		out.print(resultObj);
+		out.close();
+		return ;
+	}
+	
+	// DB 연동
+    Connection conn = DBUtil.getMySqlConnection();
+
+    String sql = "insert into notice values (0, ?, ?, ?, NOW(), ?)";
+    PreparedStatement pstmt = conn.prepareStatement(sql);
+	pstmt.setString(1, subject);
+	pstmt.setString(2, context);
+	pstmt.setString(3, (String)session.getAttribute("name"));
+	pstmt.setString(4, (String)session.getAttribute("studentId"));
+    pstmt.executeUpdate();
+	
+	DBUtil.close(pstmt);
+	DBUtil.close(conn);
+	
+	resultObj.put("result", "done");
+	out.print(resultObj);
+	out.close();
+%>
+
